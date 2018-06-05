@@ -2,7 +2,7 @@ from config import Config
 from lexer import Lexer
 from parser import Parser
 from executor import Executor
-from commands import Exit, Wc, Config, Echo, Pwd, Assignment, Cat
+from commands import Exit, Wc, Config, Echo, Pwd, Assignment, Cat, Grep
 class Control:
     '''
     Wrap up on infinite loop
@@ -11,7 +11,8 @@ class Control:
         '''
         Start of all program
         '''
-        Config.listOfCommands = {"exit": Exit, "wc": Wc, "cat": Cat, "echo": Echo, "pwd": Pwd, "=": Assignment}
+        Config.listOfCommands = {"exit": Exit, "wc": Wc, "cat": Cat, "echo": Echo, "pwd": Pwd,
+                                 "=": Assignment, "grep": Grep}
         while(Config.run):
             try:
                 Config.lexer = Lexer()

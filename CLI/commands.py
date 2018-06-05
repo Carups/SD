@@ -1,4 +1,5 @@
 import sys
+import re
 import subprocess
 from config import Config
 
@@ -78,6 +79,51 @@ class Cat(Command):
 
         return outputString
 
+class Grep(Command):
+    """
+    Find by regexp in text
+    Type string pattern last
+    """
+    def __init__(self):
+        super(Grep, self).__init__()
+
+    def run(self):
+        caseIns = False
+        wholeWord = False
+        linesAfter = 0
+        lines = []
+        pattern = ''
+
+        for i in range(len(self.argsFromInput)):
+            each = self.argsFromInput[i]
+            if each == '-A' :
+                try:
+                    linesAfter = int(self.argsFromInput[i + 1])
+                except:
+                    raise Exception("Wrong syntax grep -A")
+            elif each == "-w":
+                wholeWord = True
+            elif each == '-i' in self.argsFromInput:
+                caseIns = True
+            elif i == range(len(self.argsFromInput)) - 1:
+                pattern = each
+
+
+        if wholeWord:
+            pattern = r'\W' + pattern + r'\W'
+
+        pattern = '.*' + pattern + '.*'
+        if caseIns:
+            regexp = re.compile(pattern, flags=re.IGNORECASE)
+        else:
+            regexp = re.compile(pattern)
+
+        res = ''
+        for i in range(len(lines)):
+            if regexp.match(lines[i]):
+                res += ('\n'.join(lines[i:i + linesAfter + 1])) + '\n'
+
+        return res
 
 class Wc(Command):
     '''
