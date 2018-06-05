@@ -1,8 +1,9 @@
 import sys
 import re
 import subprocess
-from config import Config
+import argparse
 
+from config import Config
 
 class Token:
     '''
@@ -81,39 +82,37 @@ class Cat(Command):
 
 class Grep(Command):
     """
-    Find by regexp in text
+    Find by regexp in text file. You should point out file relative directory
     Type string pattern last
     """
     def __init__(self):
         super(Grep, self).__init__()
 
     def run(self):
-        caseIns = False
-        wholeWord = False
         linesAfter = 0
         lines = []
         pattern = ''
 
-        for i in range(len(self.argsFromInput)):
-            each = self.argsFromInput[i]
-            if each == '-A' :
-                try:
-                    linesAfter = int(self.argsFromInput[i + 1])
-                except:
-                    raise Exception("Wrong syntax grep -A")
-            elif each == "-w":
-                wholeWord = True
-            elif each == '-i' in self.argsFromInput:
-                caseIns = True
-            elif i == range(len(self.argsFromInput)) - 1:
-                pattern = each
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-w", "--whole", action="store_true", help = "Find only whole word")
+        parser.add_argument("-i", "--insensitive", action="store_true", help = "Compare string case-insensitive")
+        parser.add_argument("-A", "--After", type=int, help = "Print strings after concurrence")
+        parser.add_argument("dir")
+        parser.add_argument("pattern")
 
-
-        if wholeWord:
+        try:
+            args = parser.parse_args(self.argsFromInput)
+        except:
+            raise Exception("wrong argument syntax")
+        with open(Config.curDir + "/" + args.dir, 'r') as f:
+            lines = f.read().splitlines()
+        pattern = args.pattern
+        if args.After:
+            linesAfter = args.After
+        if args.whole:
             pattern = r'\W' + pattern + r'\W'
-
         pattern = '.*' + pattern + '.*'
-        if caseIns:
+        if args.insensitive:
             regexp = re.compile(pattern, flags=re.IGNORECASE)
         else:
             regexp = re.compile(pattern)
@@ -124,6 +123,7 @@ class Grep(Command):
                 res += ('\n'.join(lines[i:i + linesAfter + 1])) + '\n'
 
         return res
+
 
 class Wc(Command):
     '''
