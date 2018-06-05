@@ -97,8 +97,8 @@ class Grep(Command):
         parser.add_argument("-w", "--whole", action="store_true", help = "Find only whole word")
         parser.add_argument("-i", "--insensitive", action="store_true", help = "Compare string case-insensitive")
         parser.add_argument("-A", "--After", type=int, help = "Print strings after concurrence")
-        parser.add_argument("dir")
         parser.add_argument("pattern")
+        parser.add_argument("dir")
 
         try:
             args = parser.parse_args(self.argsFromInput)

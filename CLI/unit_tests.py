@@ -1,7 +1,11 @@
 import unittest
 from cli import *
+from commands import *
+import os
 
 class TestCLIClases(unittest.TestCase):
+    Config.listOfCommands = {"exit": Exit, "wc": Wc, "cat": Cat, "echo": Echo, "pwd": Pwd,
+                             "=": Assignment, "grep": Grep}
     def test_cat(self):
         cat = Cat()
         cat.argsFromInput = ["example"]
@@ -41,8 +45,8 @@ class TestCLIClases(unittest.TestCase):
         assignment.argsFromInput = ["file", "example"]
         assignment.run()
 
-        self.assertIn("file", variabls)
-        self.assertTrue(variabls["file"], "example")
+        self.assertIn("file", Config.variables)
+        self.assertTrue(Config.variables["file"], "example")
         assignment.argsFromInput.append("asdf")
         with self.assertRaises(Exception):
             assignment.run()
@@ -55,8 +59,7 @@ class TestCLIClases(unittest.TestCase):
 
 
     def test_lexer(self):
-        global variabls
-        variabls["replace"] = "text"
+        Config.variables["replace"] = "text"
         lexer = Lexer()
         lexer.launch("$som $replace$replace")
         self.assertTrue(lexer.show(), "texttext")
@@ -97,6 +100,22 @@ class TestCLIClases(unittest.TestCase):
         self.assertTrue(executor.launch([cat, wc]), '0 0 0\n')
         with self.assertRaises(Exception):
             executor.launch([wc, cat])
+
+    def test_grep(self):
+        grep = Grep()
+        grep.argsFromInput = "e grep_example".split()
+        self.assertEqual(grep.run(), "1 exampl txt\n")
+        grep.argsFromInput = "e -i grep_example".split()
+        self.assertEqual(grep.run(), "1 exampl txt\n2 Exampl txt2\n")
+        grep.argsFromInput = "e -A 1 grep_example".split()
+        self.assertEqual(grep.run(), "1 exampl txt\n2 Exampl txt2\n")
+        grep.argsFromInput = "e -w grep_example".split()
+        self.assertEqual(grep.run(), "")
+        grep.argsFromInput = "exampl -w grep_example".split()
+        self.assertEqual(grep.run(), "1 exampl txt\n")
+        grep.argsFromInput = "exampl -w -i grep_example".split()
+        self.assertEqual(grep.run(), "1 exampl txt\n2 Exampl txt2\n")
+
 
 if __name__ == '__main__':
     run = 0
